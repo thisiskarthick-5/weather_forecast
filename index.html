@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TechNova Weather - Smart Weather Solutions</title>
+<style>
+.preloader {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: #0A0A0F;
+display: flex;
+justify-content: center;
+align-items: center;
+z-index: 9999;
+}
+.preloader-content {
+text-align: center;
+}
+.loading-text {
+font-family: 'Orbitron', sans-serif;
+color: #00FF8C;
+font-size: 1.5rem;
+margin-top: 1rem;
+opacity: 0;
+animation: pulse 2s infinite;
+}
+.loading-icon {
+width: 60px;
+height: 60px;
+position: relative;
+}
+.loading-icon:before,
+.loading-icon:after {
+content: '';
+position: absolute;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+border-radius: 50%;
+border: 3px solid transparent;
+}
+.loading-icon:before {
+border-top-color: #00FF8C;
+animation: spin 1s infinite;
+}
+.loading-icon:after {
+border-right-color: #00E5FF;
+animation: spin 1s infinite reverse;
+}
+@keyframes spin {
+0% { transform: rotate(0deg); }
+100% { transform: rotate(360deg); }
+}
+@keyframes pulse {
+0%, 100% { opacity: 0.3; }
+50% { opacity: 1; }
+}
+.fade-out {
+opacity: 0;
+transition: opacity 0.5s ease-out;
+}
+</style>
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<script>
+tailwind.config = {
+theme: {
+extend: {
+colors: {
+primary: '#00FF8C',
+secondary: '#00E5FF'
+},
+borderRadius: {
+'none': '0px',
+'sm': '4px',
+DEFAULT: '8px',
+'md': '12px',
+'lg': '16px',
+'xl': '20px',
+'2xl': '24px',
+'3xl': '32px',
+'full': '9999px',
+'button': '8px'
+}
+}
+}
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+<style>
+:where([class^="ri-"])::before {
+content: "\f3c2";
+}
+.hero-bg {
+background: linear-gradient(135deg, #0A0A0F 0%, #1A0B2E 50%, #0F0A1A 100%);
+position: relative;
+overflow: hidden;
+}
+.hero-bg::before {
+content: '';
+position: absolute;
+top: 0;
+left: 0;
+right: 0;
+bottom: 0;
+background-image:
+radial-gradient(circle at 20% 80%, rgba(0, 255, 140, 0.1) 0%, transparent 50%),
+radial-gradient(circle at 80% 20%, rgba(0, 229, 255, 0.1) 0%, transparent 50%),
+radial-gradient(circle at 40% 40%, rgba(157, 0, 255, 0.05) 0%, transparent 50%);
+}
+.glow-text {
+text-shadow: 0 0 20px rgba(0, 255, 140, 0.5), 0 0 40px rgba(0, 255, 140, 0.3);
+}
+.glass-card {
+background: rgba(255, 255, 255, 0.05);
+backdrop-filter: blur(10px);
+border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.neon-border {
+border: 1px solid rgba(0, 255, 140, 0.3);
+box-shadow: 0 0 20px rgba(0, 255, 140, 0.2);
+}
+.floating {
+animation: float 3s ease-in-out infinite;
+}
+.floating-delayed {
+animation: float 3s ease-in-out infinite;
+animation-delay: -1.5s;
+}
+@keyframes float {
+0%, 100% { transform: translateY(0px); }
+50% { transform: translateY(-10px); }
+}
+.pulse-glow {
+animation: pulse-glow 2s ease-in-out infinite alternate;
+}
+@keyframes pulse-glow {
+from { box-shadow: 0 0 20px rgba(0, 255, 140, 0.3); }
+to { box-shadow: 0 0 30px rgba(0, 255, 140, 0.6); }
+}
+.grid-pattern {
+background-image:
+linear-gradient(rgba(0, 255, 140, 0.1) 1px, transparent 1px),
+linear-gradient(90deg, rgba(0, 255, 140, 0.1) 1px, transparent 1px);
+background-size: 50px 50px;
+}
+.weather-icon {
+filter: drop-shadow(0 0 10px rgba(0, 255, 140, 0.5));
+}
+.data-number {
+background: linear-gradient(135deg, #00FF8C, #00E5FF);
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+background-clip: text;
+}
+</style>
+</head>
+<body class="bg-gray-900 text-white font-['Inter'] overflow-x-hidden">
+<div class="preloader">
+<div class="preloader-content">
+<div class="loading-icon"></div>
+<div class="loading-text">Loading Weather Data...</div>
+</div>
+</div>
+<!-- Navigation -->
+<nav class="fixed top-0 w-full z-50 glass-card">
+<div class="max-w-7xl mx-auto px-6 py-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center space-x-2">
+<div class="w-8 h-8 flex items-center justify-center">
+<i class="ri-cloud-line text-2xl text-primary"></i>
+</div>
+<span class="text-xl font-['Orbitron'] font-bold glow-text">TechNova</span>
+</div>
+<div class="hidden md:flex items-center space-x-8">
+<a href="#" class="hover:text-primary transition-colors duration-300 relative group">
+Home
+<span class="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+</a>
+<a href="#" class="hover:text-primary transition-colors duration-300 relative group">
+Forecast
+<span class="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+</a>
+<a href="#" class="hover:text-primary transition-colors duration-300 relative group">
+Radar
+<span class="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+</a>
+<a href="#" class="hover:text-primary transition-colors duration-300 relative group">
+Climate
+<span class="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+</a>
+<a href="#" class="hover:text-primary transition-colors duration-300 relative group">
+Contact
+<span class="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+</a>
+</div>
+<button onclick="window.location.href='weather.html'"   class="bg-primary text-gray-900 px-6 py-2 !rounded-button font-semibold whitespace-nowrap pulse-glow hover:bg-opacity-90 transition-all duration-300">
+Get Started
+</button>
+</div>
+</div>
+</nav>
+<!-- Hero Section -->
+<section class="hero-bg min-h-screen flex items-center relative grid-pattern">
+<div class="w-full max-w-7xl mx-auto px-6 py-20">
+<div class="flex flex-col lg:flex-row items-center justify-between">
+<div class="lg:w-1/2 space-y-8">
+<h1 class="text-5xl lg:text-7xl font-['Orbitron'] font-black leading-tight">
+<span class="block glow-text">SMART</span>
+<span class="block text-secondary">WEATHER</span>
+<span class="block text-purple-400">SOLUTIONS</span>
+</h1>
+<p class="text-xl text-gray-300 leading-relaxed max-w-lg">
+Experience the future of weather forecasting with AI-powered predictions, real-time radar mapping, and advanced climate insights.
+</p>
+<div class="flex flex-col sm:flex-row gap-4">
+<button class="bg-primary text-gray-900 px-8 py-4 !rounded-button font-semibold whitespace-nowrap text-lg pulse-glow hover:bg-opacity-90 transition-all duration-300">
+Check Real-Time Weather
+</button>
+<button class="border border-secondary text-secondary px-8 py-4 !rounded-button font-semibold whitespace-nowrap text-lg hover:bg-secondary hover:text-gray-900 transition-all duration-300">
+Learn More
+</button>
+</div>
+</div>
+<div class="lg:w-1/2 mt-12 lg:mt-0 relative">
+<div class="relative w-full h-96 lg:h-[500px]">
+<img src="https://readdy.ai/api/search-image?query=futuristic%20cityscape%20with%20massive%20holographic%20weather%20display%20in%20the%20sky%2C%20showing%20dynamic%20weather%20patterns%20and%20data%20streams%2C%20cyberpunk%20atmosphere%20with%20neon%20lights%20reflecting%20off%20glass%20buildings%2C%20advanced%20weather%20monitoring%20system%20integrated%20into%20urban%20environment%2C%20ultra%20modern%20sci-fi%20aesthetic&width=600&height=500&seq=hero_weather_updated&orientation=landscape"
+alt="Futuristic Weather Visualization"
+class="w-full h-full object-cover object-top rounded-2xl floating">
+<!-- Floating Weather Icons -->
+<div class="absolute top-10 left-10 floating weather-icon">
+<div class="w-12 h-12 flex items-center justify-center">
+<i class="ri-cloud-line text-3xl text-primary"></i>
+</div>
+</div>
+<div class="absolute top-20 right-16 floating-delayed weather-icon">
+<div class="w-12 h-12 flex items-center justify-center">
+<i class="ri-flashlight-line text-3xl text-secondary"></i>
+</div>
+</div>
+<div class="absolute bottom-20 left-16 floating weather-icon">
+<div class="w-12 h-12 flex items-center justify-center">
+<i class="ri-sun-line text-3xl text-yellow-400"></i>
+</div>
+</div>
+<div class="absolute bottom-10 right-10 floating-delayed weather-icon">
+<div class="w-12 h-12 flex items-center justify-center">
+<i class="ri-rainy-line text-3xl text-blue-400"></i>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Current Weather Overview -->
+<section class="py-20 bg-gray-900 relative">
+<div class="max-w-7xl mx-auto px-6">
+<div class="text-center mb-16">
+<h2 class="text-4xl font-['Orbitron'] font-bold mb-4 glow-text">Current Weather Overview</h2>
+<p class="text-gray-400 text-lg">Real-time atmospheric conditions powered by advanced AI algorithms</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+<!-- Temperature Card -->
+<div class="glass-card neon-border p-6 rounded-xl hover:bg-opacity-10 transition-all duration-300 group">
+<div class="flex items-center justify-between mb-4">
+<div class="w-12 h-12 flex items-center justify-center">
+<i class="ri-temp-hot-line text-2xl text-primary weather-icon"></i>
+</div>
+<span class="text-sm text-gray-400">Temperature</span>
+</div>
+<div class="space-y-2">
+<div class="text-3xl font-['Orbitron'] font-bold data-number">24°C</div>
+<div class="text-sm text-gray-400">Feels like 27°C</div>
+<div class="flex items-center space-x-2">
+<span class="text-xs text-green-400">↑ 2°</span>
+<span class="text-xs text-gray-500">from yesterday</span>
+</div>
+</div>
+</div>
+<!-- Humidity Card -->
+<div class="glass-card neon-border p-6 rounded-xl hover:bg-opacity-10 transition-all duration-300 group">
+<div class="flex items-center justify-between mb-4">
+<div class="w-12 h-12 flex items-center justify-center">
+<i class="ri-drop-line text-2xl text-secondary weather-icon"></i>
+</div>
+<span class="text-sm text-gray-400">Humidity</span>
+</div>
+<div class="space-y-2">
+<div class="text-3xl font-['Orbitron'] font-bold data-number">68%</div>
+<div class="text-sm text-gray-400">Comfortable level</div>
+<div class="flex items-center space-x-2">
+<span class="text-xs text-blue-400">↓ 5%</span>
+<span class="text-xs text-gray-500">from morning</span>
+</div>
+</div>
+</div>
+<!-- Wind Speed Card -->
+<div class="glass-card neon-border p-6 rounded-xl hover:bg-opacity-10 transition-all duration-300 group">
+<div class="flex items-center justify-between mb-4">
+<div class="w-12 h-12 flex items-center justify-center">
+<i class="ri-windy-line text-2xl text-purple-400 weather-icon"></i>
+</div>
+<span class="text-sm text-gray-400">Wind Speed</span>
+</div>
+<div class="space-y-2">
+<div class="text-3xl font-['Orbitron'] font-bold data-number">15 km/h</div>
+<div class="text-sm text-gray-400">Northeast direction</div>
+<div class="flex items-center space-x-2">
+<span class="text-xs text-yellow-400">→ NE</span>
+<span class="text-xs text-gray-500">steady wind</span>
+</div>
+</div>
+</div>
+<!-- Air Quality Card -->
+<div class="glass-card neon-border p-6 rounded-xl hover:bg-opacity-10 transition-all duration-300 group">
+<div class="flex items-center justify-between mb-4">
+<div class="w-12 h-12 flex items-center justify-center">
+<i class="ri-leaf-line text-2xl text-green-400 weather-icon"></i>
+</div>
+<span class="text-sm text-gray-400">Air Quality</span>
+</div>
+<div class="space-y-2">
+<div class="text-3xl font-['Orbitron'] font-bold data-number">Good</div>
+<div class="text-sm text-gray-400">AQI: 42</div>
+<div class="flex items-center space-x-2">
+<span class="text-xs text-green-400">✓ Healthy</span>
+<span class="text-xs text-gray-500">for outdoor activities</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Features Section -->
+<section class="py-20 bg-gray-800 relative">
+<div class="max-w-7xl mx-auto px-6">
+<div class="text-center mb-16">
+<h2 class="text-4xl font-['Orbitron'] font-bold mb-4 glow-text">Advanced Weather Intelligence</h2>
+<p class="text-gray-400 text-lg max-w-2xl mx-auto">Harness the power of artificial intelligence and cutting-edge technology for unprecedented weather accuracy</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<!-- AI Predictions -->
+<div class="glass-card neon-border p-8 rounded-xl hover:bg-opacity-10 transition-all duration-300 group">
+<div class="text-center space-y-6">
+<div class="w-20 h-20 mx-auto flex items-center justify-center floating">
+<img src="https://readdy.ai/api/search-image?query=abstract%203D%20visualization%20of%20AI%20weather%20prediction%20system%2C%20floating%20crystalline%20structure%20with%20glowing%20neon%20green%20energy%20paths%2C%20futuristic%20neural%20network%20with%20weather%20data%20streams%2C%20high%20tech%20digital%20brain%20processing%20meteorological%20patterns&width=80&height=80&seq=ai_weather_brain&orientation=squarish"
+alt="AI Neural Network"
+class="w-full h-full object-cover rounded-xl weather-icon">
+</div>
+<h3 class="text-2xl font-['Orbitron'] font-bold text-primary">AI Predictions</h3>
+<p class="text-gray-400 leading-relaxed">
+Our advanced machine learning algorithms analyze millions of data points to deliver weather predictions with 95% accuracy up to 14 days ahead.
+</p>
+<div class="space-y-3">
+<div class="flex items-center justify-between text-sm">
+<span class="text-gray-400">Accuracy Rate</span>
+<span class="text-primary font-semibold">95.2%</span>
+</div>
+<div class="flex items-center justify-between text-sm">
+<span class="text-gray-400">Forecast Range</span>
+<span class="text-secondary font-semibold">14 Days</span>
+</div>
+<div class="flex items-center justify-between text-sm">
+<span class="text-gray-400">Data Sources</span>
+<span class="text-purple-400 font-semibold">1000+</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Radar Maps -->
+<div class="glass-card neon-border p-8 rounded-xl hover:bg-opacity-10 transition-all duration-300 group">
+<div class="text-center space-y-6">
+<div class="w-20 h-20 mx-auto flex items-center justify-center floating-delayed">
+<img src="https://readdy.ai/api/search-image?query=futuristic%203D%20holographic%20weather%20radar%20display%20floating%20in%20space%2C%20advanced%20meteorological%20scanning%20system%20with%20glowing%20neon%20blue%20circular%20patterns%2C%20high%20tech%20storm%20tracking%20interface%20with%20dynamic%20data%20visualization%2C%20cyberpunk%20style%20weather%20monitoring%20technology&width=80&height=80&seq=radar_system_updated&orientation=squarish"
+alt="Holographic Radar"
+class="w-full h-full object-cover rounded-xl weather-icon">
+</div>
+<h3 class="text-2xl font-['Orbitron'] font-bold text-secondary">Radar Maps</h3>
+<p class="text-gray-400 leading-relaxed">
+Real-time Doppler radar imagery with advanced storm tracking, precipitation intensity mapping, and severe weather alerts.
+</p>
+<div class="space-y-3">
+<div class="flex items-center justify-between text-sm">
+<span class="text-gray-400">Update Frequency</span>
+<span class="text-primary font-semibold">5 Minutes</span>
+</div>
+<div class="flex items-center justify-between text-sm">
+<span class="text-gray-400">Coverage Area</span>
+<span class="text-secondary font-semibold">Global</span>
+</div>
+<div class="flex items-center justify-between text-sm">
+<span class="text-gray-400">Resolution</span>
+<span class="text-purple-400 font-semibold">1km²</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Climate Insights -->
+<div class="glass-card neon-border p-8 rounded-xl hover:bg-opacity-10 transition-all duration-300 group">
+<div class="text-center space-y-6">
+<div class="w-20 h-20 mx-auto flex items-center justify-center floating">
+<img src="https://readdy.ai/api/search-image?query=advanced%203D%20climate%20analysis%20system%20with%20floating%20holographic%20earth%2C%20dynamic%20environmental%20data%20streams%20with%20neon%20purple%20glow%2C%20futuristic%20global%20weather%20pattern%20visualization%2C%20high%20tech%20atmospheric%20monitoring%20interface%20with%20particle%20effects&width=80&height=80&seq=climate_system_new&orientation=squarish"
+alt="Climate Analytics"
+class="w-full h-full object-cover rounded-xl weather-icon">
+</div>
+<h3 class="text-2xl font-['Orbitron'] font-bold text-purple-400">Climate Insights</h3>
+<p class="text-gray-400 leading-relaxed">
+Comprehensive climate analysis with historical trends, seasonal patterns, and long-term environmental impact assessments.
+</p>
+<div class="space-y-3">
+<div class="flex items-center justify-between text-sm">
+<span class="text-gray-400">Historical Data</span>
+<span class="text-primary font-semibold">50+ Years</span>
+</div>
+<div class="flex items-center justify-between text-sm">
+<span class="text-gray-400">Climate Models</span>
+<span class="text-secondary font-semibold">Advanced</span>
+</div>
+<div class="flex items-center justify-between text-sm">
+<span class="text-gray-400">Trend Analysis</span>
+<span class="text-purple-400 font-semibold">Real-time</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- CTA Section -->
+<section class="py-20 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 relative">
+<div class="max-w-4xl mx-auto px-6 text-center">
+<div class="space-y-8">
+<h2 class="text-5xl font-['Orbitron'] font-bold glow-text">Ready to Experience the Future?</h2>
+<p class="text-xl text-gray-300 leading-relaxed max-w-2xl mx-auto">
+Join thousands of professionals who trust TechNova Weather for accurate, AI-powered weather intelligence. Start your free trial today.
+</p>
+<div class="flex flex-col sm:flex-row gap-6 justify-center items-center">
+<button class="bg-primary text-gray-900 px-10 py-4 !rounded-button font-bold whitespace-nowrap text-lg pulse-glow hover:bg-opacity-90 transition-all duration-300">
+Start Free Trial
+</button>
+<div class="flex items-center space-x-4 text-gray-400">
+<div class="w-6 h-6 flex items-center justify-center">
+<i class="ri-check-line text-primary"></i>
+</div>
+<span>No credit card required</span>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
+<div class="text-center">
+<div class="text-3xl font-['Orbitron'] font-bold data-number mb-2">50K+</div>
+<div class="text-gray-400">Active Users</div>
+</div>
+<div class="text-center">
+<div class="text-3xl font-['Orbitron'] font-bold data-number">99.9%</div>
+<div class="text-gray-400">Uptime</div>
+</div>
+<div class="text-center">
+<div class="text-3xl font-['Orbitron'] font-bold data-number">24/7</div>
+<div class="text-gray-400">Support</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Footer -->
+<footer class="bg-gray-900 border-t border-gray-800 py-12">
+<div class="max-w-7xl mx-auto px-6">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+<div class="space-y-4">
+<div class="flex items-center space-x-2">
+<div class="w-8 h-8 flex items-center justify-center">
+<i class="ri-cloud-line text-2xl text-primary"></i>
+</div>
+<span class="text-xl font-['Orbitron'] font-bold glow-text">TechNova</span>
+</div>
+<p class="text-gray-400 text-sm leading-relaxed">
+The future of weather forecasting is here. Experience unparalleled accuracy with our AI-powered weather intelligence platform.
+</p>
+</div>
+<div class="space-y-4">
+<h4 class="font-semibold text-primary">Product</h4>
+<div class="space-y-2">
+<a href="#" class="block text-gray-400 hover:text-white transition-colors text-sm">Weather API</a>
+<a href="#" class="block text-gray-400 hover:text-white transition-colors text-sm">Radar Maps</a>
+<a href="#" class="block text-gray-400 hover:text-white transition-colors text-sm">Climate Data</a>
+<a href="#" class="block text-gray-400 hover:text-white transition-colors text-sm">Mobile App</a>
+</div>
+</div>
+<div class="space-y-4">
+<h4 class="font-semibold text-secondary">Company</h4>
+<div class="space-y-2">
+<a href="#" class="block text-gray-400 hover:text-white transition-colors text-sm">About Us</a>
+<a href="#" class="block text-gray-400 hover:text-white transition-colors text-sm">Careers</a>
+<a href="#" class="block text-gray-400 hover:text-white transition-colors text-sm">Press</a>
+<a href="#" class="block text-gray-400 hover:text-white transition-colors text-sm">Contact</a>
+</div>
+</div>
+<div class="space-y-4">
+<h4 class="font-semibold text-purple-400">Connect</h4>
+<div class="flex space-x-4">
+<a href="#" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-primary transition-colors">
+<i class="ri-twitter-line"></i>
+</a>
+<a href="#" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-primary transition-colors">
+<i class="ri-linkedin-line"></i>
+</a>
+<a href="#" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-primary transition-colors">
+<i class="ri-github-line"></i>
+</a>
+</div>
+</div>
+</div>
+<div class="border-t border-gray-800 mt-8 pt-8 text-center">
+<p class="text-gray-400 text-sm">© 2024 TechNova Weather. All rights reserved. Powered by advanced AI technology.</p>
+</div>
+</div>
+</footer>
+<script id="navigation-interactions">
+document.addEventListener('DOMContentLoaded', function() {
+const nav = document.querySelector('nav');
+window.addEventListener('scroll', function() {
+if (window.scrollY > 50) {
+nav.style.background = 'rgba(10, 10, 15, 0.95)';
+} else {
+nav.style.background = 'rgba(255, 255, 255, 0.05)';
+}
+});
+});
+</script>
+<script id="weather-data-animation">
+document.addEventListener('DOMContentLoaded', function() {
+const weatherCards = document.querySelectorAll('.glass-card');
+weatherCards.forEach(card => {
+card.addEventListener('mouseenter', function() {
+this.style.transform = 'translateY(-5px)';
+this.style.boxShadow = '0 20px 40px rgba(0, 255, 140, 0.2)';
+});
+card.addEventListener('mouseleave', function() {
+this.style.transform = 'translateY(0)';
+this.style.boxShadow = '0 0 20px rgba(0, 255, 140, 0.2)';
+});
+});
+});
+</script>
+<script id="floating-elements-animation">
+document.addEventListener('DOMContentLoaded', function() {
+const floatingElements = document.querySelectorAll('.floating, .floating-delayed');
+floatingElements.forEach((element, index) => {
+const delay = index * 0.5;
+element.style.animationDelay = `-${delay}s`;
+});
+});
+</script>
+<script id="button-glow-effects">
+document.addEventListener('DOMContentLoaded', function() {
+const glowButtons = document.querySelectorAll('.pulse-glow');
+glowButtons.forEach(button => {
+button.addEventListener('mouseenter', function() {
+this.style.boxShadow = '0 0 40px rgba(0, 255, 140, 0.8)';
+this.style.transform = 'scale(1.05)';
+});
+button.addEventListener('mouseleave', function() {
+this.style.boxShadow = '0 0 20px rgba(0, 255, 140, 0.3)';
+this.style.transform = 'scale(1)';
+});
+});
+});
+</script>
+<script id="preloader-handler">
+document.addEventListener('DOMContentLoaded', function() {
+const preloader = document.querySelector('.preloader');
+window.addEventListener('load', function() {
+setTimeout(function() {
+preloader.classList.add('fade-out');
+setTimeout(function() {
+preloader.style.display = 'none';
+}, 500);
+}, 1500);
+});
+});
+</script>
+</body>
+</html>
