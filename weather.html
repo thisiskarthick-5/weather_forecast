@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TECHTITANS</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+  </style>
+</head>
+<body class="bg-[#F5F5F5] text-[#333333] min-h-screen">
+
+  <!-- Navbar -->
+  <nav class="flex justify-between items-center px-4 md:px-8 py-4 bg-white shadow sticky top-0 z-50">
+    <h1 class="text-lg sm:text-xl md:text-2xl font-bold text-[#4A90E2] whitespace-nowrap">TECHTITANS</h1>
+    <div class="hidden md:flex items-center gap-3">
+      <input id="searchInput" type="text" placeholder="Search city..." class="px-3 py-2 rounded-lg border border-gray-300 bg-[#F5F5F5] text-[#333333] text-sm placeholder-gray-500 focus:ring-2 focus:ring-[#50C878] outline-none w-36 md:w-56" />
+      <button id="searchBtn" class="bg-[#4A90E2] text-white px-3 py-2 rounded-lg text-sm hover:bg-[#50C878] transition">Search</button>
+    </div>
+    <button id="menuToggle" class="md:hidden text-[#4A90E2] text-2xl focus:outline-none">☰</button>
+  </nav>
+
+  <!-- Mobile Search -->
+  <div id="mobileMenu" class="hidden flex flex-col gap-2 px-4 py-4 bg-white shadow-md md:hidden">
+    <input id="searchInputMobile" type="text" placeholder="Search city..." class="px-4 py-2 rounded-lg border border-gray-300 bg-[#F5F5F5] text-sm text-[#333333] placeholder-gray-500 focus:ring-2 focus:ring-[#50C878] outline-none" />
+    <button id="searchBtnMobile" class="bg-[#4A90E2] text-white px-4 py-2 text-sm rounded-lg hover:bg-[#50C878] transition">Search</button>
+  </div>
+
+  <!-- Hero Section -->
+  <section class="relative text-center py-10 md:py-16 bg-gradient-to-r from-[#4A90E2] to-[#50C878] text-white px-4">
+    <div class="max-w-screen-md mx-auto">
+      <h2 id="cityName" class="text-xl md:text-4xl font-bold truncate">San Francisco</h2>
+      <p id="updateTime" class="mt-1 md:mt-2 opacity-90 text-xs md:text-base">Updated just now</p>
+
+      <!-- Stats -->
+      <div class="flex flex-col sm:flex-row justify-center mt-6 gap-3 md:gap-6">
+        <div class="bg-white rounded-lg px-5 py-3 shadow-md text-[#333333] text-sm w-full sm:w-auto">
+          <p class="opacity-70">Rainfall (1h)</p>
+          <p id="rainfall" class="font-bold text-[#4A90E2]">-- mm</p>
+        </div>
+        <div class="bg-white rounded-lg px-5 py-3 shadow-md text-[#333333] text-sm w-full sm:w-auto">
+          <p class="opacity-70">Humidity</p>
+          <p id="humidity" class="font-bold text-[#50C878]">--%</p>
+        </div>
+        <div class="bg-white rounded-lg px-5 py-3 shadow-md text-[#333333] text-sm w-full sm:w-auto">
+          <p class="opacity-70">Flood Risk</p>
+          <p id="floodRisk" class="font-bold text-[#50C878]">--</p>
+        </div>
+      </div>
+
+      <!-- Main Info Card -->
+      <div class="mt-6 md:mt-8 inline-block bg-white/90 backdrop-blur rounded-2xl px-6 md:px-10 py-5 md:py-8 shadow-lg text-[#333333] w-full max-w-xs mx-auto">
+        <p class="text-sm md:text-lg opacity-70">Today</p>
+        <h3 id="temperature" class="text-3xl md:text-5xl font-bold text-[#4A90E2]">--°C</h3>
+        <p id="condition" class="opacity-80 text-sm md:text-base">Loading...</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Forecast Section -->
+  <section class="px-4 md:px-8 py-10">
+    <div class="max-w-screen-xl mx-auto">
+      <h3 class="text-base md:text-xl font-bold mb-5 text-[#333333] text-center md:text-left">6-Hour Forecast</h3>
+      <div id="forecast" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
+        <!-- Forecast Cards will be inserted here -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Script -->
+  <script>
+    const apiKey = "ac18761cfaab3abc45ab17672920d2f2";
+
+    const searchBtn = document.getElementById("searchBtn");
+    const searchInput = document.getElementById("searchInput");
+    const searchBtnMobile = document.getElementById("searchBtnMobile");
+    const searchInputMobile = document.getElementById("searchInputMobile");
+    const menuToggle = document.getElementById("menuToggle");
+    const mobileMenu = document.getElementById("mobileMenu");
+
+    const cityName = document.getElementById("cityName");
+    const updateTime = document.getElementById("updateTime");
+    const temperature = document.getElementById("temperature");
+    const humidity = document.getElementById("humidity");
+    const rainfall = document.getElementById("rainfall");
+    const floodRisk = document.getElementById("floodRisk");
+    const condition = document.getElementById("condition");
+    const forecast = document.getElementById("forecast");
+
+    menuToggle.addEventListener("click", () => {
+      mobileMenu.classList.toggle("hidden");
+    });
+
+    function assessFloodRisk(rain) {
+      if (rain > 100) return "Severe";
+      if (rain > 50) return "High";
+      if (rain > 20) return "Moderate";
+      return "Low";
+    }
+
+    function setFloodRiskColor(level) {
+      floodRisk.classList.remove("text-[#E24A4A]", "text-[#FFA500]", "text-[#50C878]");
+      if (level === "Severe") floodRisk.classList.add("text-[#E24A4A]");
+      else if (level === "High") floodRisk.classList.add("text-[#FFA500]");
+      else floodRisk.classList.add("text-[#50C878]");
+    }
+
+    async function fetchWeather(city) {
+      try {
+        const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`);
+        const data = await res.json();
+
+        if (data.cod === "404") {
+          alert("City not found!");
+          return;
+        }
+
+        cityName.textContent = `${data.name}, ${data.sys.country}`;
+        updateTime.textContent = new Date().toLocaleString();
+        temperature.textContent = Math.round(data.main.temp) + "°C";
+        condition.textContent = data.weather[0].description;
+        humidity.textContent = data.main.humidity + "%";
+
+        const rain1h = data.rain?.["1h"] || 0;
+        rainfall.textContent = rain1h + " mm";
+
+        const floodLevel = assessFloodRisk(rain1h);
+        floodRisk.textContent = floodLevel;
+        setFloodRiskColor(floodLevel);
+
+        const resForecast = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${apiKey}&units=metric`);
+        const dataForecast = await resForecast.json();
+
+        forecast.innerHTML = "";
+        dataForecast.list.slice(0, 6).forEach(item => {
+          const rain3h = item.rain?.["3h"] || 0;
+          const floodLevel = assessFloodRisk(rain3h);
+
+          const card = document.createElement("div");
+          card.className = "bg-white rounded-lg p-4 text-center shadow-md hover:scale-105 transition text-[#333333]";
+          card.innerHTML = `
+            <p class="font-semibold opacity-70">${new Date(item.dt_txt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+            <p class="text-xl md:text-2xl font-bold text-[#4A90E2]">${Math.round(item.main.temp)}°C</p>
+            <p class="opacity-70 text-sm">${item.weather[0].main}</p>
+            <p class="text-sm text-[#4A90E2]">Rain: ${rain3h} mm</p>
+            <p class="text-sm font-semibold ${floodLevel === "Severe" ? 'text-[#E24A4A]' : floodLevel === "High" ? 'text-[#FFA500]' : 'text-[#50C878]'}">
+              ${floodLevel} Risk
+            </p>
+          `;
+          forecast.appendChild(card);
+        });
+
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    searchBtn.addEventListener("click", () => {
+      const city = searchInput.value.trim();
+      if (city) fetchWeather(city);
+    });
+
+    searchBtnMobile.addEventListener("click", () => {
+      const city = searchInputMobile.value.trim();
+      if (city) {
+        fetchWeather(city);
+        mobileMenu.classList.add("hidden");
+      }
+    });
+
+    fetchWeather("San Francisco");
+  </script>
+
+</body>
+</html>
