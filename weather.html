@@ -7,53 +7,60 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Inter', sans-serif; }
+    body { 
+      font-family: 'Inter', sans-serif; 
+      background: #0A0F1E; /* dark background */
+      color: #E0E0E0;
+      background-image: linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+      background-size: 40px 40px; /* grid effect */
+    }
   </style>
 </head>
-<body class="bg-[#F5F5F5] text-[#333333] min-h-screen">
+<body class="min-h-screen">
 
   <!-- Navbar -->
-  <nav class="flex justify-between items-center px-4 md:px-8 py-4 bg-white shadow sticky top-0 z-50">
-    <h1 class="text-lg sm:text-xl md:text-2xl font-bold text-[#4A90E2] whitespace-nowrap">TECHTITANS</h1>
+  <nav class="flex justify-between items-center px-4 md:px-8 py-4 bg-[#0F1629] shadow sticky top-0 z-50">
+    <h1 class="text-lg sm:text-xl md:text-2xl font-bold text-[#00FFC6] whitespace-nowrap">TECHTITANS</h1>
     <div class="hidden md:flex items-center gap-3">
-      <input id="searchInput" type="text" placeholder="Search city..." class="px-3 py-2 rounded-lg border border-gray-300 bg-[#F5F5F5] text-[#333333] text-sm placeholder-gray-500 focus:ring-2 focus:ring-[#50C878] outline-none w-36 md:w-56" />
-      <button id="searchBtn" class="bg-[#4A90E2] text-white px-3 py-2 rounded-lg text-sm hover:bg-[#50C878] transition">Search</button>
+      <input id="searchInput" type="text" placeholder="Search city..." class="px-3 py-2 rounded-lg border border-gray-600 bg-[#1A233A] text-[#E0E0E0] text-sm placeholder-gray-400 focus:ring-2 focus:ring-[#00FFC6] outline-none w-36 md:w-56" />
+      <button id="searchBtn" class="bg-[#00FFC6] text-black px-3 py-2 rounded-lg text-sm hover:bg-[#00BFA6] transition">Search</button>
     </div>
-    <button id="menuToggle" class="md:hidden text-[#4A90E2] text-2xl focus:outline-none">☰</button>
+    <button id="menuToggle" class="md:hidden text-[#00FFC6] text-2xl focus:outline-none">☰</button>
   </nav>
 
   <!-- Mobile Search -->
-  <div id="mobileMenu" class="hidden flex flex-col gap-2 px-4 py-4 bg-white shadow-md md:hidden">
-    <input id="searchInputMobile" type="text" placeholder="Search city..." class="px-4 py-2 rounded-lg border border-gray-300 bg-[#F5F5F5] text-sm text-[#333333] placeholder-gray-500 focus:ring-2 focus:ring-[#50C878] outline-none" />
-    <button id="searchBtnMobile" class="bg-[#4A90E2] text-white px-4 py-2 text-sm rounded-lg hover:bg-[#50C878] transition">Search</button>
+  <div id="mobileMenu" class="hidden flex flex-col gap-2 px-4 py-4 bg-[#0F1629] shadow-md md:hidden">
+    <input id="searchInputMobile" type="text" placeholder="Search city..." class="px-4 py-2 rounded-lg border border-gray-600 bg-[#1A233A] text-sm text-[#E0E0E0] placeholder-gray-400 focus:ring-2 focus:ring-[#00FFC6] outline-none" />
+    <button id="searchBtnMobile" class="bg-[#00FFC6] text-black px-4 py-2 text-sm rounded-lg hover:bg-[#00BFA6] transition">Search</button>
   </div>
 
   <!-- Hero Section -->
-  <section class="relative text-center py-10 md:py-16 bg-gradient-to-r from-[#4A90E2] to-[#50C878] text-white px-4">
+  <section class="relative text-center py-10 md:py-16 bg-gradient-to-r from-[#00FFC6] to-[#007BFF] text-white px-4">
     <div class="max-w-screen-md mx-auto">
       <h2 id="cityName" class="text-xl md:text-4xl font-bold truncate">San Francisco</h2>
       <p id="updateTime" class="mt-1 md:mt-2 opacity-90 text-xs md:text-base">Updated just now</p>
 
       <!-- Stats -->
       <div class="flex flex-col sm:flex-row justify-center mt-6 gap-3 md:gap-6">
-        <div class="bg-white rounded-lg px-5 py-3 shadow-md text-[#333333] text-sm w-full sm:w-auto">
+        <div class="bg-[#0F1629] rounded-lg px-5 py-3 shadow-md text-[#E0E0E0] text-sm w-full sm:w-auto">
           <p class="opacity-70">Rainfall (1h)</p>
-          <p id="rainfall" class="font-bold text-[#4A90E2]">-- mm</p>
+          <p id="rainfall" class="font-bold text-[#00BFFF]">-- mm</p>
         </div>
-        <div class="bg-white rounded-lg px-5 py-3 shadow-md text-[#333333] text-sm w-full sm:w-auto">
+        <div class="bg-[#0F1629] rounded-lg px-5 py-3 shadow-md text-[#E0E0E0] text-sm w-full sm:w-auto">
           <p class="opacity-70">Humidity</p>
-          <p id="humidity" class="font-bold text-[#50C878]">--%</p>
+          <p id="humidity" class="font-bold text-[#00FFC6]">--%</p>
         </div>
-        <div class="bg-white rounded-lg px-5 py-3 shadow-md text-[#333333] text-sm w-full sm:w-auto">
+        <div class="bg-[#0F1629] rounded-lg px-5 py-3 shadow-md text-[#E0E0E0] text-sm w-full sm:w-auto">
           <p class="opacity-70">Flood Risk</p>
-          <p id="floodRisk" class="font-bold text-[#50C878]">--</p>
+          <p id="floodRisk" class="font-bold text-[#00FFC6]">--</p>
         </div>
       </div>
 
       <!-- Main Info Card -->
-      <div class="mt-6 md:mt-8 inline-block bg-white/90 backdrop-blur rounded-2xl px-6 md:px-10 py-5 md:py-8 shadow-lg text-[#333333] w-full max-w-xs mx-auto">
+      <div class="mt-6 md:mt-8 inline-block bg-[#0F1629]/90 backdrop-blur rounded-2xl px-6 md:px-10 py-5 md:py-8 shadow-lg text-[#E0E0E0] w-full max-w-xs mx-auto">
         <p class="text-sm md:text-lg opacity-70">Today</p>
-        <h3 id="temperature" class="text-3xl md:text-5xl font-bold text-[#4A90E2]">--°C</h3>
+        <h3 id="temperature" class="text-3xl md:text-5xl font-bold text-[#00BFFF]">--°C</h3>
         <p id="condition" class="opacity-80 text-sm md:text-base">Loading...</p>
       </div>
     </div>
@@ -62,16 +69,17 @@
   <!-- Forecast Section -->
   <section class="px-4 md:px-8 py-10">
     <div class="max-w-screen-xl mx-auto">
-      <h3 class="text-base md:text-xl font-bold mb-5 text-[#333333] text-center md:text-left">6-Hour Forecast</h3>
+      <h3 class="text-base md:text-xl font-bold mb-5 text-[#E0E0E0] text-center md:text-left">6-Hour Forecast</h3>
       <div id="forecast" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
         <!-- Forecast Cards will be inserted here -->
       </div>
     </div>
   </section>
 
-  <!-- Script -->
+  <!-- Keep your JS code as it is -->
   <script>
-    const apiKey = "ac18761cfaab3abc45ab17672920d2f2";
+
+        const apiKey = "ac18761cfaab3abc45ab17672920d2f2";
 
     const searchBtn = document.getElementById("searchBtn");
     const searchInput = document.getElementById("searchInput");
@@ -171,6 +179,7 @@
     });
 
     fetchWeather("San Francisco");
+    // your original JS here (unchanged)
   </script>
 
 </body>
