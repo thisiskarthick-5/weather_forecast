@@ -74,6 +74,15 @@
       <div id="forecast" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
         <!-- Forecast Cards will be inserted here -->
       </div>
+
+      <!-- Charts Section -->
+      <div class="mt-10">
+        <h3 class="text-base md:text-xl font-bold mb-5 text-[#E0E0E0] text-center md:text-left">Forecast Graphs</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <canvas id="tempChart" class="bg-white rounded-xl p-4"></canvas>
+          <canvas id="rainChart" class="bg-white rounded-xl p-4"></canvas>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -95,11 +104,12 @@
     </div>
   </footer>
 
-  <!-- Keep your JS code as it is -->
-  <script>
-    
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-        const apiKey = "ac18761cfaab3abc45ab17672920d2f2";
+  <!-- JS Code -->
+  <script>
+    const apiKey = "ac18761cfaab3abc45ab17672920d2f2";
 
     const searchBtn = document.getElementById("searchBtn");
     const searchInput = document.getElementById("searchInput");
@@ -117,8 +127,10 @@
     const condition = document.getElementById("condition");
     const forecast = document.getElementById("forecast");
 
-    menuToggle.addEventListener("click", () => {
-      mobileMenu.classList.toggle("hidden");
+    let tempChart, rainChart;
+
+    menuToggle?.addEventListener("click", () => {
+      mobileMenu?.classList.toggle("hidden");
     });
 
     function assessFloodRisk(rain) {
@@ -162,6 +174,10 @@
         const dataForecast = await resForecast.json();
 
         forecast.innerHTML = "";
+        const labels = [];
+        const temps = [];
+        const rains = [];
+
         dataForecast.list.slice(0, 6).forEach(item => {
           const rain3h = item.rain?.["3h"] || 0;
           const floodLevel = assessFloodRisk(rain3h);
@@ -178,6 +194,43 @@
             </p>
           `;
           forecast.appendChild(card);
+
+          labels.push(new Date(item.dt_txt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+          temps.push(Math.round(item.main.temp));
+          rains.push(rain3h);
+        });
+
+        // Temperature Line Chart
+        if (tempChart) tempChart.destroy();
+        tempChart = new Chart(document.getElementById("tempChart"), {
+          type: "line",
+          data: {
+            labels: labels,
+            datasets: [{
+              label: "Temperature (°C)",
+              data: temps,
+              borderColor: "#4A90E2",
+              backgroundColor: "rgba(74,144,226,0.3)",
+              fill: true,
+              tension: 0.3
+            }]
+          },
+          options: { responsive: true, plugins: { legend: { labels: { color: "#333" } } } }
+        });
+
+        // Rainfall Bar Chart
+        if (rainChart) rainChart.destroy();
+        rainChart = new Chart(document.getElementById("rainChart"), {
+          type: "bar",
+          data: {
+            labels: labels,
+            datasets: [{
+              label: "Rainfall (mm)",
+              data: rains,
+              backgroundColor: "#00BFFF"
+            }]
+          },
+          options: { responsive: true, plugins: { legend: { labels: { color: "#333" } } } }
         });
 
       } catch (err) {
@@ -194,12 +247,11 @@
       const city = searchInputMobile.value.trim();
       if (city) {
         fetchWeather(city);
-        mobileMenu.classList.add("hidden");
+        mobileMenu?.classList.add("hidden");
       }
     });
 
     fetchWeather("San Francisco");
-    // your original JS here (unchanged)
   </script>
 
 </body>
