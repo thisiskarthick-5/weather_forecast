@@ -15,14 +15,18 @@
                         linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
       background-size: 40px 40px; /* grid effect */
     }
+    canvas { 
+      width: 100% !important; 
+      height: auto !important; 
+    }
   </style>
 </head>
-<body class="min-h-screen">
+<body class="min-h-screen overflow-x-hidden">
 
   <!-- Navbar -->
   <nav class="flex justify-between items-center px-4 md:px-8 py-4 bg-[#0F1629] shadow sticky top-0 z-50">
     <h1 class="text-lg sm:text-xl md:text-2xl font-bold text-[#00FFC6] whitespace-nowrap">TECHTITANS</h1>
-    <div class="hidden md:flex items-center gap-3">
+    <div class="hidden md:flex items-center gap-3 flex-shrink">
       <input id="searchInput" type="text" placeholder="Search city..." class="px-3 py-2 rounded-lg border border-gray-600 bg-[#1A233A] text-[#E0E0E0] text-sm placeholder-gray-400 focus:ring-2 focus:ring-[#00FFC6] outline-none w-36 md:w-56" />
       <button id="searchBtn" class="bg-[#00FFC6] text-black px-3 py-2 rounded-lg text-sm hover:bg-[#00BFA6] transition">Search</button>
     </div>
@@ -31,7 +35,7 @@
 
   <!-- Hero Section -->
   <section class="relative text-center py-10 md:py-16 bg-gradient-to-r from-[#00FFC6] to-[#007BFF] text-white px-4">
-    <div class="max-w-screen-md mx-auto">
+    <div class="max-w-screen-lg mx-auto w-full">
 
       <!-- Mobile Search Above City Name -->
       <div class="block md:hidden mb-4">
@@ -43,23 +47,23 @@
       <p id="updateTime" class="mt-1 md:mt-2 opacity-90 text-xs md:text-base">Updated just now</p>
 
       <!-- Stats -->
-      <div class="flex flex-col sm:flex-row justify-center mt-6 gap-3 md:gap-6">
-        <div class="bg-[#0F1629] rounded-lg px-5 py-3 shadow-md text-[#E0E0E0] text-sm w-full sm:w-auto">
+      <div class="flex flex-col sm:flex-row justify-center mt-6 gap-3 md:gap-6 flex-wrap">
+        <div class="bg-[#0F1629] rounded-lg px-5 py-3 shadow-md text-[#E0E0E0] text-sm flex-1 min-w-[120px]">
           <p class="opacity-70">Rainfall (1h)</p>
           <p id="rainfall" class="font-bold text-[#00BFFF]">-- mm</p>
         </div>
-        <div class="bg-[#0F1629] rounded-lg px-5 py-3 shadow-md text-[#E0E0E0] text-sm w-full sm:w-auto">
+        <div class="bg-[#0F1629] rounded-lg px-5 py-3 shadow-md text-[#E0E0E0] text-sm flex-1 min-w-[120px]">
           <p class="opacity-70">Humidity</p>
           <p id="humidity" class="font-bold text-[#00FFC6]">--%</p>
         </div>
-        <div class="bg-[#0F1629] rounded-lg px-5 py-3 shadow-md text-[#E0E0E0] text-sm w-full sm:w-auto">
+        <div class="bg-[#0F1629] rounded-lg px-5 py-3 shadow-md text-[#E0E0E0] text-sm flex-1 min-w-[120px]">
           <p class="opacity-70">Flood Risk</p>
           <p id="floodRisk" class="font-bold text-[#00FFC6]">--</p>
         </div>
       </div>
 
       <!-- Main Info Card -->
-      <div class="mt-6 md:mt-8 inline-block bg-[#0F1629]/90 backdrop-blur rounded-2xl px-6 md:px-10 py-5 md:py-8 shadow-lg text-[#E0E0E0] w-full max-w-xs mx-auto">
+      <div class="mt-6 md:mt-8 bg-[#0F1629]/90 backdrop-blur rounded-2xl px-6 md:px-10 py-5 md:py-8 shadow-lg text-[#E0E0E0] w-full max-w-xs mx-auto">
         <p class="text-sm md:text-lg opacity-70">Today</p>
         <h3 id="temperature" class="text-3xl md:text-5xl font-bold text-[#00BFFF]">--°C</h3>
         <p id="condition" class="opacity-80 text-sm md:text-base">Loading...</p>
@@ -79,8 +83,12 @@
       <div class="mt-10">
         <h3 class="text-base md:text-xl font-bold mb-5 text-[#E0E0E0] text-center md:text-left">Forecast Graphs</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <canvas id="tempChart" class="bg-white rounded-xl p-4"></canvas>
-          <canvas id="rainChart" class="bg-white rounded-xl p-4"></canvas>
+          <div class="w-full h-64 md:h-80">
+            <canvas id="tempChart" class="bg-white rounded-xl p-4"></canvas>
+          </div>
+          <div class="w-full h-64 md:h-80">
+            <canvas id="rainChart" class="bg-white rounded-xl p-4"></canvas>
+          </div>
         </div>
       </div>
     </div>
@@ -215,7 +223,7 @@
               tension: 0.3
             }]
           },
-          options: { responsive: true, plugins: { legend: { labels: { color: "#333" } } } }
+          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: "#333" } } } }
         });
 
         // Rainfall Bar Chart
@@ -230,7 +238,7 @@
               backgroundColor: "#00BFFF"
             }]
           },
-          options: { responsive: true, plugins: { legend: { labels: { color: "#333" } } } }
+          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: "#333" } } } }
         });
 
       } catch (err) {
